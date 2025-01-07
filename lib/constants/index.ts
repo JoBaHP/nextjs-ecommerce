@@ -39,3 +39,5 @@ export const PAYMENT_METHODS = process.env.PAYMENT_METHODS
   
 export const DEFAULT_PAYMENT_METHOD =
   process.env.DEFAULT_PAYMENT_METHOD || 'Credit Card';
+
+  export const SENDER_EMAIL = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
