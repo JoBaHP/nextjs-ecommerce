@@ -1,13 +1,14 @@
 'use server';
 
 import {
-  paymentMethodSchema,
   shippingAddressSchema,
   signInFormSchema,
   signUpFormSchema,
+  paymentMethodSchema,
   updateUserSchema,
 } from '../validators';
 import { auth, signIn, signOut } from '@/auth';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { hash } from '../encrypt';
 import { prisma } from '@/db/prisma';
 import { formatError } from '../utils';
@@ -32,10 +33,9 @@ export async function signInWithCredentials(
 
     return { success: true, message: 'Signed in successfully' };
   } catch (error) {
-  if (error instanceof Error && error.message.includes('redirect')) {
-    throw error; 
-  }
-  console.error('SignIn Error:', error);
+    if (isRedirectError(error)) {
+      throw error;
+    }
     return { success: false, message: 'Invalid email or password' };
   }
 }
@@ -74,11 +74,9 @@ export async function signUpUser(prevState: unknown, formData: FormData) {
 
     return { success: true, message: 'User registered successfully' };
   } catch (error) {
-  if (error instanceof Error && error.message.includes('redirect')) {
-    throw error; // Propagate redirect errors.
-  }
-
-  console.error('SignUp Error:', error);
+    if (isRedirectError(error)) {
+      throw error;
+    }
     return { success: false, message: formatError(error) };
   }
 }
@@ -115,9 +113,8 @@ export async function updateUserAddress(data: ShippingAddress) {
       message: 'User updated successfully',
     };
   } catch (error) {
-  console.error('Update Address Error:', error); 
-  return { success: false, message: formatError(error) };
-}
+    return { success: false, message: formatError(error) };
+  }
 }
 
 // Update user's payment method
@@ -175,10 +172,8 @@ export async function updateProfile(user: { name: string; email: string }) {
       message: 'User updated successfully',
     };
   } catch (error) {
-  console.error('Update Profile Error:', error);
-  return { success: false, message: formatError(error) };
-}
-
+    return { success: false, message: formatError(error) };
+  }
 }
 
 // Get all the users
@@ -230,13 +225,11 @@ export async function deleteUser(id: string) {
       message: 'User deleted successfully',
     };
   } catch (error) {
-  console.error('Delete User Error:', error);
-  return {
-    success: false,
-    message: formatError(error),
-  };
-}
-
+    return {
+      success: false,
+      message: formatError(error),
+    };
+  }
 }
 
 // Update a user
@@ -257,8 +250,6 @@ export async function updateUser(user: z.infer<typeof updateUserSchema>) {
       message: 'User updated successfully',
     };
   } catch (error) {
-  console.error('Update User Error:', error);
-  return { success: false, message: formatError(error) };
-}
-
+    return { success: false, message: formatError(error) };
+  }
 }
