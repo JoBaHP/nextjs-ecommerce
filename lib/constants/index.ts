@@ -47,7 +47,7 @@ export const DEFAULT_PAYMENT_METHOD =
   slug: '',
   category: '',
   images: [],
-  brand: '',
+  brand: '', formats: ["image/avif", "image/webp"],
   description: '',
   price: '0',
   stock: 0,
@@ -56,3 +56,8 @@ export const DEFAULT_PAYMENT_METHOD =
   isFeatured: false,
   banner: null,
 };
+
+
+export const USER_ROLES = process.env.USER_ROLES
+  ? process.env.USER_ROLES.split(', ')
+  : ['admin', 'user'];
