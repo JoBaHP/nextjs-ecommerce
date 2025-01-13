@@ -1,53 +1,49 @@
-import { Metadata } from 'next';
+import { Button } from '@/components/ui/button';
 import { getOrderById } from '@/lib/actions/order.actions';
-import { notFound } from 'next/navigation';
-import OrderDetailsTable from './order-details-table';
-import { ShippingAddress } from '@/types';
-import { auth } from '@/auth';
+import Link from 'next/link';
+import { notFound, redirect } from 'next/navigation';
 import Stripe from 'stripe';
 
-export const metadata: Metadata = {
-  title: 'Order Details',
-};
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
-const OrderDetailsPage = async (props: {
-  params: Promise<{
-    id: string;
-  }>;
+const SuccessPage = async (props: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ payment_intent: string }>;
 }) => {
   const { id } = await props.params;
+  const { payment_intent: paymentIntentId } = await props.searchParams;
 
+  // Fetch order
   const order = await getOrderById(id);
   if (!order) notFound();
 
-  const session = await auth();
+  // Retrieve payment intent
+  const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-  let client_secret = null;
-
-  // Check if is not paid and using stripe
-  if (order.paymentMethod === 'Stripe' && !order.isPaid) {
-    // Init stripe instance
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-    // Create payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(Number(order.totalPrice) * 100),
-      currency: 'USD',
-      metadata: { orderId: order.id },
-    });
-    client_secret = paymentIntent.client_secret;
+  // Check if payment intent is valid
+  if (
+    paymentIntent.metadata.orderId == null ||
+    paymentIntent.metadata.orderId !== order.id.toString()
+  ) {
+    return notFound();
   }
 
+  // Check if payment is successful
+  const isSuccess = paymentIntent.status === 'succeeded';
+
+  if (!isSuccess) return redirect(`/order/${id}`);
+
   return (
-    <OrderDetailsTable
-      order={{
-        ...order,
-        shippingAddress: order.shippingAddress as ShippingAddress,
-      }}
-      stripeClientSecret={client_secret}
-      paypalClientId={process.env.PAYPAL_CLIENT_ID || 'sb'}
-      isAdmin={session?.user?.role === 'admin' || false}
-    />
+    <div className='max-w-4xl w-full mx-auto space-y-8'>
+      <div className='flex flex-col gap-6 items-center'>
+        <h1 className='h1-bold'>Thanks for your purchase</h1>
+        <div>We are processing your order.</div>
+        <Button asChild>
+          <Link href={`/order/${id}`}>View Order</Link>
+        </Button>
+      </div>
+    </div>
   );
 };
 
-export default OrderDetailsPage;
+export default SuccessPage;

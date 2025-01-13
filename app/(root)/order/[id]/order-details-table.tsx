@@ -236,7 +236,7 @@ const OrderDetailsTable = ({
               </div>
 
               {/* PayPal Payment */}
-              {!isPaid && paymentMethod === 'Pay Pal' && (
+              {!isPaid && paymentMethod === 'PayPal' && (
                 <div>
                   <PayPalScriptProvider options={{ clientId: paypalClientId }}>
                     <PrintLoadingState />
@@ -258,7 +258,7 @@ const OrderDetailsTable = ({
               )}
 
               {/* Cash On Delivery */}
-              {isAdmin && !isPaid && paymentMethod === 'Cash on Delivery' && (
+              {isAdmin && !isPaid && paymentMethod === 'CashOnDelivery' && (
                 <MarkAsPaidButton />
               )}
               {isAdmin && isPaid && !isDelivered && <MarkAsDeliveredButton />}
