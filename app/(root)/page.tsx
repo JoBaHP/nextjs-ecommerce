@@ -1,9 +1,6 @@
 import ProductList from '@/components/shared/product/product-list';
 import {
-  getLatestProducts,
-  getFeaturedProducts,
-} from '@/lib/actions/product.actions';
-import ProductCarousel from '@/components/shared/product/product-carousel';
+  getLatestProducts} from '@/lib/actions/product.actions';
 import IconBoxes from '@/components/icon-boxes';
 import ViewAllProductsButton from '@/components/view-all-products-button';
 import DealCountdown from '@/components/deal-countdown';
@@ -11,7 +8,6 @@ import DealCountdown from '@/components/deal-countdown';
 
 const Homepage = async () => {
   const latestProducts = await getLatestProducts();
-  const featuredProducts = await getFeaturedProducts();
 
   return (
     <>
