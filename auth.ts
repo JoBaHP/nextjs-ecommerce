@@ -3,9 +3,9 @@ import NextAuth from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/db/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { compare } from './lib/encrypt';
 import type { NextAuthConfig } from 'next-auth';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export const config = {
@@ -19,6 +19,13 @@ export const config = {
   },
   adapter: PrismaAdapter(prisma),
   providers: [
+    // Google authentication provider
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+
+    // Credentials authentication provider
     CredentialsProvider({
       credentials: {
         email: { type: 'email' },
@@ -70,7 +77,7 @@ export const config = {
 
       return session;
     },
-    async jwt({ token, user, trigger, session }: any) {
+    async jwt({ token, user, account, profile, trigger, session }: any) {
       // Assign user fields to token
       if (user) {
         token.id = user.id;
@@ -86,29 +93,29 @@ export const config = {
             data: { name: token.name },
           });
         }
+      }
 
-        if (trigger === 'signIn' || trigger === 'signUp') {
-          const cookiesObject = await cookies();
-          const sessionCartId = cookiesObject.get('sessionCartId')?.value;
+      // Handle Google authentication
+      if (account?.provider === 'google') {
+        token.id = profile?.sub; // Google user ID
+        token.picture = profile?.picture; // Google profile picture
+        token.email = profile?.email; // Google email
+        token.name = profile?.name; // Google display name
 
-          if (sessionCartId) {
-            const sessionCart = await prisma.cart.findFirst({
-              where: { sessionCartId },
-            });
+        // Ensure the user exists in the database
+        const existingUser = await prisma.user.findFirst({
+          where: { email: profile?.email },
+        });
 
-            if (sessionCart) {
-              // Delete current user cart
-              await prisma.cart.deleteMany({
-                where: { userId: user.id },
-              });
-
-              // Assign new cart
-              await prisma.cart.update({
-                where: { id: sessionCart.id },
-                data: { userId: user.id },
-              });
-            }
-          }
+        if (!existingUser) {
+          // Create a new user if they don't exist
+          await prisma.user.create({
+            data: {
+              name: profile?.name,
+              email: profile?.email,
+              image: profile?.picture,
+            },
+          });
         }
       }
 
