@@ -1,5 +1,8 @@
-Here’s the first description revised to include **Stripe**, **PayPal**, and **Zod**:
+# Next.js E-Commerce
 
+![Project Status](https://img.shields.io/badge/status-Beta-yellow)  
+🚧 **Project Status: Beta (In Development)** 🚧  
+This project is currently under active development.
 ---
 
 ## **Project Description: Next.js E-Commerce Application**
