@@ -17,14 +17,15 @@ export async function GET(req: NextRequest) {
 
     // Get recent purchases (last 10 minutes)
     const TEN_MINUTES_AGO = new Date(Date.now() - 10 * 60 * 1000);
-    const recentPurchases = await prisma.order.count({
+    const recentPurchases = await prisma.orderItem.count({
       where: {
-        productId,
-        createdAt: { gte: TEN_MINUTES_AGO },
+        productId: productId, // ✅ Fixed query
+        order: {
+          createdAt: { gte: TEN_MINUTES_AGO },
+        },
       },
     });
 
-    // Ensure the response is always an object
     const payload = { liveViews: liveViews ?? 0, recentPurchases: recentPurchases ?? 0 };
 
     // Send event stream response
