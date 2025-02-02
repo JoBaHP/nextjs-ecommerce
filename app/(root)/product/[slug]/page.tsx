@@ -9,6 +9,7 @@ import { getMyCart } from '@/lib/actions/cart.actions';
 import ReviewList from './review-list';
 import { auth } from '@/auth';
 import Rating from '@/components/shared/product/rating';
+import LiveNotifications from '@/components/LiveNotifications';
 
 const ProductDetailsPage = async (props: {
   params: Promise<{ slug: string }>;
@@ -90,6 +91,9 @@ const ProductDetailsPage = async (props: {
           </div>
         </div>
       </section>
+      {/* ✅ Live Notifications Below Product Details */}
+       <LiveNotifications slug={slug} />
+
       <section className='mt-10'>
         <h2 className='h2-bold mb-5'>Customer Reviews</h2>
         <ReviewList
