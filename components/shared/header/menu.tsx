@@ -10,6 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import UserButton from './user-button';
+import CartCounter from '@/components/cart-counter';
 
 const Menu = () => {
   return (
@@ -19,6 +20,7 @@ const Menu = () => {
         <Button asChild variant='ghost'>
           <Link href='/cart'>
             <ShoppingCart /> Cart
+            <CartCounter />
           </Link>
         </Button>
         <UserButton />
@@ -34,6 +36,7 @@ const Menu = () => {
             <Button asChild variant='ghost'>
               <Link href='/cart'>
                 <ShoppingCart /> Cart
+                <CartCounter />
               </Link>
             </Button>
             <UserButton />
